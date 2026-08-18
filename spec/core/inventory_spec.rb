@@ -1,4 +1,4 @@
-require_relative "spec_helper"
+require_relative "../spec_helper"
 
 RSpec.describe "Inventory" do
   it "sorts by price low to high" do

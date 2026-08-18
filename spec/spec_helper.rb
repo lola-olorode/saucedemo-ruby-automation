@@ -3,9 +3,13 @@ require_relative "../lib/pages/login_page"
 require_relative "../lib/pages/inventory_page"
 require_relative "../lib/pages/cart_page"
 require_relative "../lib/pages/checkout_page"
-require_relative "../lib/support/logger"
-require_relative "../lib/support/screenshot"
-require_relative "../config/test_data"
+require_relative "../lib/shared/utils/logger"
+require_relative "../lib/shared/utils/screenshot"
+require_relative "../lib/flows/auth_flow"
+require_relative "../lib/flows/shopping_flow"
+require_relative "../lib/flows/checkout_flow"
+require_relative "../dataloader/user_loader"
+require_relative "../dataloader/checkout_data_loader"
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -39,15 +43,12 @@ RSpec.configure do |config|
   end
 
   # Helper available in every spec: returns a driver already logged in
-  # as the standard user, landed on the inventory page. Saves every
-  # spec that needs an authenticated session from repeating the login
-  # steps.
+  # as the standard fixture user, landed on the inventory page — via
+  # AuthFlow, so the login journey lives in one place instead of being
+  # repeated across specs.
   config.include(Module.new do
     def logged_in_driver
-      login_page = Pages::LoginPage.new(@driver)
-      login_page.load
-      login_page.login(TestData::USERS[:standard], TestData::PASSWORD)
-      Pages::InventoryPage.new(@driver).loaded?
+      Flows::AuthFlow.new(@driver).login_and_reach_inventory("standard")
       @driver
     end
   end)

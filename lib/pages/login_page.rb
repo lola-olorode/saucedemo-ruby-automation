@@ -1,5 +1,5 @@
-require_relative "base_page"
-require_relative "../../config/environments"
+require_relative "../shared/base_page"
+require_relative "../shared/environments"
 
 module Pages
   class LoginPage < BasePage

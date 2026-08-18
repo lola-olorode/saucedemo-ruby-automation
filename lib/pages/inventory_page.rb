@@ -1,4 +1,4 @@
-require_relative "base_page"
+require_relative "../shared/base_page"
 
 module Pages
   class InventoryPage < BasePage

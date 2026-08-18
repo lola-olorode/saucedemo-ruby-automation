@@ -2,3 +2,4 @@
 --format documentation
 --format RspecJunitFormatter
 --out reports/rspec_results.xml
+--pattern "spec/**/*_spec.rb"
