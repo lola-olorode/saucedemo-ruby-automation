@@ -1,0 +1,5 @@
+/reports/
+/.bundle/
+/vendor/bundle/
+*.gem
+.env

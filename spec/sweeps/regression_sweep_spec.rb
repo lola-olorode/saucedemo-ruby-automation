@@ -4,7 +4,7 @@ require_relative "../spec_helper"
 # multiple fixture accounts, the kind of thing run before a release
 # rather than on every commit.
 RSpec.describe "Regression sweep", :regression do
-  ["standard", "performance_glitch"].each do |user_key|
+  %w[standard performance_glitch].each do |user_key|
     it "completes a full purchase journey as '#{user_key}'" do
       Flows::AuthFlow.new(@driver).login_and_reach_inventory(user_key)
       cart = Flows::ShoppingFlow.new(@driver).add_backpack_and_view_cart

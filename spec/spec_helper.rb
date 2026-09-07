@@ -22,7 +22,14 @@ RSpec.configure do |config|
 
   logger = Support::TestLogger.instance
 
-  config.before(:each) do
+  # spec/core and spec/sweeps drive a real browser; spec/unit exercises
+  # framework logic (environments, dataloaders) in isolation and has no
+  # business paying for a Chrome launch on every example.
+  config.define_derived_metadata(file_path: %r{/spec/(core|sweeps)/}) do |metadata|
+    metadata[:type] = :feature
+  end
+
+  config.before(:each, type: :feature) do
     options = Selenium::WebDriver::Chrome::Options.new
     options.add_argument("--headless=new") unless ENV["HEADED"] == "1"
     options.add_argument("--window-size=1400,1000")
@@ -33,7 +40,7 @@ RSpec.configure do |config|
     @driver = Selenium::WebDriver.for(:chrome, options: options)
   end
 
-  config.after(:each) do |example|
+  config.after(:each, type: :feature) do |example|
     if example.exception
       path = Support::Screenshot.capture(@driver, example.full_description)
       logger.error("FAILED: #{example.full_description} | screenshot: #{path}")

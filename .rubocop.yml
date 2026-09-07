@@ -1,0 +1,63 @@
+plugins:
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+  SuggestExtensions: false
+  TargetRubyVersion: 3.3
+  Exclude:
+    - "reports/**/*"
+    - "vendor/**/*"
+
+# Page objects and flows are declarative by design — a locator table or a
+# step-by-step flow method reads better as one block than split up to
+# satisfy a length limit.
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/MethodLength:
+  Max: 20
+
+# Framework code favors short intention-revealing names (el, i, io) in
+# small, obvious scopes.
+Naming/MethodParameterName:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+# This codebase has used double-quoted strings throughout since day one —
+# match that existing convention rather than flagging every string in
+# every file the linter wasn't added for.
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+# @driver is intentionally set once in a global `before(:each)` hook
+# (spec_helper.rb) and shared by every page/flow call in a spec — that's
+# the standard pattern for a Selenium session in RSpec, not a `let`
+# candidate.
+RSpec/InstanceVariable:
+  Enabled: false
+
+# spec/ is organized by test type (core/sweeps/unit), per the README —
+# not mirrored 1:1 to lib/'s structure.
+RSpec/SpecFilePathFormat:
+  Enabled: false
+
+# spec/core and spec/sweeps describe a feature or journey ("Cart and
+# Checkout", "Smoke sweep"), not a single class — there's no one class
+# these integration-style specs are "testing".
+RSpec/DescribeClass:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Max: 15
+
+RSpec/MultipleExpectations:
+  Max: 5
+
+RSpec/NestedGroups:
+  Max: 4

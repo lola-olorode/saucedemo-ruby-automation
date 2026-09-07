@@ -9,7 +9,7 @@ module Pages
     ERROR_MESSAGE = [:css, "[data-test='error']"].freeze
 
     def load
-      open(Environments.current[:base_url])
+      visit(Environments.current[:base_url])
     end
 
     def login(username, password)

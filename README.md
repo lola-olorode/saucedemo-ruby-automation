@@ -5,7 +5,7 @@ structured as a layered framework — the same architectural pattern I use
 in my day-to-day work (Ruby, RSpec, Selenium), applied here to a public
 site so the approach is fully shareable.
 
-A parallel [Python/pytest version](../saucedemo-automation) of this same
+A parallel [Python/pytest version](https://github.com/lola-olorode/saucedemo-portfolio) of this same
 site exists too, using the same layered structure — built to demonstrate
 stack versatility.
 
@@ -41,8 +41,10 @@ saucedemo-ruby/
 ├── spec/
 │   ├── spec_helper.rb           # Driver lifecycle, logged-in helper, failure hook
 │   ├── core/                     # Feature-level specs, one file per screen/feature
-│   └── sweeps/                    # Full-journey smoke + regression sweeps
-├── .github/workflows/            # CI: runs the suite on every push
+│   ├── sweeps/                    # Full-journey smoke + regression sweeps
+│   └── unit/                      # Framework logic specs (no browser)
+├── .github/workflows/            # CI: RuboCop, then the suite, on every push
+├── .rubocop.yml                  # Lint rules (annotated where they diverge from defaults)
 ├── Gemfile
 ├── Rakefile
 └── .rspec
@@ -67,7 +69,22 @@ saucedemo-ruby/
   isolation; **`spec/sweeps/`** covers full end-to-end journeys — smoke
   (fast, every commit) and regression (broader, pre-release) — kept
   separate because they serve different purposes and run at different
-  times in a CI pipeline.
+  times in a CI pipeline. **`spec/unit/`** tests framework logic
+  (environment selection, fixture loading) directly, with no browser
+  involved — `spec_helper.rb` only spins up Chrome for specs under
+  `core/` and `sweeps/`, so unit specs stay fast.
+
+## Reliability notes
+
+`BasePage#click` and `#type_text` verify that a native Selenium action
+actually reached the page (a listener confirms the click fired; the
+input's DOM value is checked after typing) before falling back to a
+JS-dispatched equivalent — some of saucedemo.com's React-controlled
+elements silently don't respond to plain WebDriver clicks/`send_keys` on
+current Chrome. Native interaction is always tried first so specs still
+exercise real browser input by default; the fallback only fires when
+that demonstrably didn't work, rather than switching every interaction
+to JS and losing that realism everywhere.
 
 ## Coverage
 
@@ -83,15 +100,35 @@ saucedemo-ruby/
 
 ```bash
 bundle install
-bundle exec rake spec              # full suite, headless by default
+bundle exec rubocop                  # lint
+bundle exec rake spec              # full suite — headless by default, no browser window appears
+bundle exec rake unit                # framework-logic specs only, no browser
 bundle exec rspec spec/sweeps        # full-journey sweeps only
-HEADED=1 bundle exec rspec spec/core  # watch UI specs run in a visible browser
+HEADED=1 bundle exec rspec spec/core  # watch it happen in a real Chrome window
 TEST_ENV=staging bundle exec rspec     # target a different environment
 ```
+
+**Windows / PowerShell** (e.g. VS Code's integrated terminal) needs env
+vars set as a separate statement rather than prefixed on the command line:
+
+```powershell
+bundle install
+bundle exec rubocop
+bundle exec rake spec
+
+$env:HEADED = "1"
+bundle exec rspec spec/core          # watch it happen in a real Chrome window
+
+$env:TEST_ENV = "staging"
+bundle exec rspec                     # target a different environment
+```
+
+`$env:HEADED` stays set for the rest of that terminal session — open a new
+terminal, or run `Remove-Item Env:HEADED`, to go back to headless.
 
 Reports land in `reports/` — logs, screenshots on failure, and a JUnit XML
 result file for CI integration.
 
 ## Tech stack
 
-Ruby · Selenium WebDriver · RSpec · GitHub Actions
+Ruby · Selenium WebDriver · RSpec · RuboCop · GitHub Actions
