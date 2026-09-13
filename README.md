@@ -1,38 +1,52 @@
 # SauceDemo Test Automation Framework (Ruby)
 
-A Selenium + RSpec UI automation suite for [saucedemo.com](https://www.saucedemo.com/),
-structured as a layered framework — the same architectural pattern I use
-in my day-to-day work (Ruby, RSpec, Selenium), applied here to a public
-site so the approach is fully shareable.
+This is a Selenium + RSpec suite that tests [saucedemo.com](https://www.saucedemo.com/),
+a demo shopping site built for practicing automation. I built it in the stack I
+actually use day to day — Ruby, RSpec, Selenium — and structured it the same way
+I'd structure a real test framework at work: organized in layers so changes to
+the app don't mean editing the same thing in ten different places.
 
-A parallel [Python/pytest version](https://github.com/lola-olorode/saucedemo-portfolio) of this same
-site exists too, using the same layered structure — built to demonstrate
-stack versatility.
+There's also a [Python/pytest version](https://github.com/lola-olorode/saucedemo-portfolio)
+of this exact same project, built the same way — mainly to show the same
+approach carries across stacks, not just this one.
 
-## Architecture
+## What's being tested
+
+- **The app:** [saucedemo.com](https://www.saucedemo.com/), a React site made for this
+  exact purpose. It comes with a few test accounts that each behave differently —
+  `standard_user` (works normally), `locked_out_user` (blocked at login), and
+  `performance_glitch_user` (runs slow on purpose) — so the suite has real edge
+  cases to test against, not just the happy path.
+- **Browser:** Chrome, and it runs headless (no visible window) by default — set
+  `HEADED=1` if you want to actually watch it click through the site.
+- **Environment:** defaults to `prod` (the live public site); `TEST_ENV=staging`
+  switches it, to show how a real project would target different environments
+  without touching spec code.
+
+## How it's organized
 
 ```
 saucedemo-ruby/
 ├── lib/
-│   ├── components/           # Reusable widgets shared across multiple pages
-│   │   └── menu_component.rb  # The burger menu appears on every logged-in screen
-│   ├── flows/                 # Business-journey layer: orchestrates pages into a task
+│   ├── components/           # UI pieces reused across pages (e.g. the burger menu)
+│   │   └── menu_component.rb
+│   ├── flows/                 # Chains page actions into a full journey (log in, buy something)
 │   │   ├── auth_flow.rb        # Login journeys
 │   │   ├── shopping_flow.rb    # Sort / add-to-cart journeys
 │   │   └── checkout_flow.rb    # Full checkout journey
-│   ├── pages/                 # Page Object Model — one class per screen
+│   ├── pages/                 # One class per screen — the Page Object Model
 │   │   ├── login_page.rb
 │   │   ├── inventory_page.rb
 │   │   ├── cart_page.rb
 │   │   └── checkout_page.rb
 │   └── shared/
-│       ├── base_page.rb        # Shared wait/interaction helpers for every page
-│       ├── base_flow.rb        # Shared step-logging for every flow
-│       ├── environments.rb     # dev/staging/prod-style env layering
+│       ├── base_page.rb        # Wait/interaction helpers every page uses
+│       ├── base_flow.rb        # Shared step-logging every flow uses
+│       ├── environments.rb     # dev/staging/prod-style environment switching
 │       └── utils/
-│           ├── logger.rb        # Run-scoped file + console logging
-│           └── screenshot.rb    # Screenshot-on-failure capture
-├── dataloader/                # Test data as data, not hardcoded in specs
+│           ├── logger.rb        # Logs each run to file and console
+│           └── screenshot.rb    # Grabs a screenshot the moment a spec fails
+├── dataloader/                # Test data lives in JSON, not hardcoded in specs
 │   ├── fixtures/
 │   │   ├── users.json
 │   │   └── checkout_info.json
@@ -40,63 +54,118 @@ saucedemo-ruby/
 │   └── checkout_data_loader.rb
 ├── spec/
 │   ├── spec_helper.rb           # Driver lifecycle, logged-in helper, failure hook
-│   ├── core/                     # Feature-level specs, one file per screen/feature
-│   ├── sweeps/                    # Full-journey smoke + regression sweeps
-│   └── unit/                      # Framework logic specs (no browser)
-├── .github/workflows/            # CI: RuboCop, then the suite, on every push
+│   ├── core/                     # One file per feature/screen
+│   ├── sweeps/                    # Full end-to-end journeys (smoke + regression)
+│   └── unit/                      # Specs for the framework's own code, no browser needed
+├── .github/workflows/            # CI: RuboCop first, then the suite, on every push
 ├── .rubocop.yml                  # Lint rules (annotated where they diverge from defaults)
 ├── Gemfile
 ├── Rakefile
 └── .rspec
 ```
 
-**Why layered like this:**
-- **`pages/`** know how to interact with one screen. They don't know
-  *why* — that's a level up.
-- **`flows/`** know the business journey — "log in", "buy something" —
-  by composing multiple page objects. A spec that needs "add an item and
-  check out" calls one flow method instead of repeating four page-object
-  calls; if the checkout journey changes, one flow file changes, not
-  every spec that touches checkout.
-- **`components/`** hold UI pieces reused across many pages (here, the
-  burger menu), so a shared element's locators live in exactly one place.
-- **`shared/`** holds cross-cutting concerns every page/flow needs
-  (waits, logging, environment config) — nothing feature-specific.
-- **`dataloader/`** treats test data as data: fixtures live in JSON,
-  loader classes read them. Adding a new test account means editing a
-  fixture file, not code.
-- **`spec/core/`** covers individual features and edge cases in
-  isolation; **`spec/sweeps/`** covers full end-to-end journeys — smoke
-  (fast, every commit) and regression (broader, pre-release) — kept
-  separate because they serve different purposes and run at different
-  times in a CI pipeline. **`spec/unit/`** tests framework logic
-  (environment selection, fixture loading) directly, with no browser
-  involved — `spec_helper.rb` only spins up Chrome for specs under
-  `core/` and `sweeps/`, so unit specs stay fast.
+**Why split it up like this:**
 
-## Reliability notes
+A **page object** only knows how to click and read things on one screen — it has
+no idea *why* it's being used.
 
-`BasePage#click` and `#type_text` verify that a native Selenium action
-actually reached the page (a listener confirms the click fired; the
-input's DOM value is checked after typing) before falling back to a
-JS-dispatched equivalent — some of saucedemo.com's React-controlled
-elements silently don't respond to plain WebDriver clicks/`send_keys` on
-current Chrome. Native interaction is always tried first so specs still
-exercise real browser input by default; the fallback only fires when
-that demonstrably didn't work, rather than switching every interaction
-to JS and losing that realism everywhere.
+A **flow** sits above that and knows the actual business journey, like "log in"
+or "buy something," by stringing page objects together. So a spec that needs to
+add an item and check out just calls one flow method, instead of repeating the
+same four steps in every spec. And if the checkout screen changes, I fix it in
+one flow file instead of everywhere it's used.
 
-## Coverage
+**Components** are UI bits shared across many pages (here, the burger menu), so
+its locators live in exactly one place instead of being copy-pasted.
 
-| Area | Scenarios |
-|---|---|
-| Login (core) | Valid login, locked-out user, empty/invalid credentials |
-| Inventory (core) | Sort by price (asc/desc), sort by name, add-to-cart badge count |
-| Cart & Checkout (core) | Remove item, full happy-path checkout, required-field validation |
-| Smoke sweep | One full login → shop → checkout journey |
-| Regression sweep | Full journey repeated across multiple fixture accounts |
+**Shared** holds the stuff every page and flow needs regardless of feature —
+waiting for elements, logging, environment config.
 
-## Running locally
+**dataloader** treats test data as data: it lives in JSON files, and adding a
+new test account is just editing a file, not touching code.
+
+Inside `spec/`:
+  - **core** covers individual features and their edge cases in isolation.
+  - **sweeps** covers full journeys start to finish — a fast **smoke** version
+    that runs on every commit, and a broader **regression** version meant for
+    before a release. They're split apart because they run at different times
+    for different reasons.
+  - **unit** tests the framework's own logic, like environment selection and
+    fixture loading, with no browser involved at all — `spec_helper.rb` only
+    spins up Chrome for specs under `core/` and `sweeps/`, so unit specs stay fast.
+
+Everything runs through **GitHub Actions**: it lints the code first (RuboCop),
+and only runs the full suite if that passes.
+
+## What each spec actually checks
+
+### Login — [`spec/core/login_spec.rb`](./spec/core/login_spec.rb)
+
+**Lands on the inventory page with valid credentials.** Logs in as
+`standard_user` and checks the inventory page actually loads — this is the
+first thing that has to work, since nothing else matters if login is broken.
+
+**Blocks a locked-out user.** Logs in as `locked_out_user` and checks the login
+page shows a "locked out" error instead of letting them through.
+
+**Shows the right error for bad credentials.** Runs the same check three ways:
+nothing entered at all, a real username with no password, and a made-up
+username/password pair — each should show its own matching error message.
+
+### Inventory — [`spec/core/inventory_spec.rb`](./spec/core/inventory_spec.rb)
+
+Sorting by price low-to-high, high-to-low, and by name A-to-Z — each one checks
+the list actually ends up in the right order. Plus **adding an item updates the
+cart badge**: starts at 0, adds one item, checks it shows 1.
+
+### Cart & checkout — [`spec/core/cart_checkout_spec.rb`](./spec/core/cart_checkout_spec.rb)
+
+**Removing an item from the cart** works and actually empties it back out.
+**A full checkout, start to finish** adds an item, goes through checkout, and
+checks for the "Thank you" confirmation at the end — this is the main "does
+the site still work" test. **Checkout blocks a missing first name** — leaves
+that field blank and checks the right validation error shows up.
+
+### Full journeys, start to finish — [`spec/sweeps/`](./spec/sweeps)
+
+The **smoke sweep** ([`smoke_sweep_spec.rb`](./spec/sweeps/smoke_sweep_spec.rb))
+does one complete run — log in, add something to the cart, check out — as
+`standard_user`. It runs on every commit as a quick "is anything fundamentally
+broken" check, separate from the more detailed, isolated checks in `spec/core/`.
+
+The **regression sweep**
+([`regression_sweep_spec.rb`](./spec/sweeps/regression_sweep_spec.rb)) repeats
+that same full journey, but across both `standard_user` and
+`performance_glitch_user`. It's meant to run before a release rather than on
+every commit — it's about testing the same journey across different accounts,
+not new edge cases.
+
+### Testing the framework itself — [`spec/unit/`](./spec/unit)
+
+**`environments_spec.rb`** checks environment selection: it defaults to `prod`
+when `TEST_ENV` isn't set, picks up the right config for `staging`, and raises
+a clear error for an environment that doesn't exist.
+
+**`user_loader_spec.rb`** checks fixture loading: a known user key returns the
+right username/password, and an unknown key raises a clear error instead of
+failing silently.
+
+Neither of these opens a browser — that's the point of keeping them separate
+from `core/` and `sweeps/`.
+
+## A couple of things worth knowing
+
+Some elements on saucedemo.com are built in React and quietly ignore a normal
+Selenium click or `send_keys` call — the click looks like it worked, but
+nothing actually happens on the page. So `BasePage#click` and `#type_text`
+check that the native action really landed (a listener confirms the click
+fired; typed text is checked against the field afterward) before falling back
+to firing the event via JavaScript instead. It always tries the normal way
+first — the fallback only kicks in when the normal way demonstrably didn't
+work, rather than switching every interaction to JS and losing that realism
+everywhere.
+
+## Getting it running
 
 ```bash
 bundle install
@@ -104,12 +173,13 @@ bundle exec rubocop                  # lint
 bundle exec rake spec              # full suite — headless by default, no browser window appears
 bundle exec rake unit                # framework-logic specs only, no browser
 bundle exec rspec spec/sweeps        # full-journey sweeps only
-HEADED=1 bundle exec rspec spec/core  # watch it happen in a real Chrome window
-TEST_ENV=staging bundle exec rspec     # target a different environment
+HEADED=1 bundle exec rspec spec/core  # watch it happen in an actual Chrome window
+TEST_ENV=staging bundle exec rspec     # point it at a different environment
 ```
 
-**Windows / PowerShell** (e.g. VS Code's integrated terminal) needs env
-vars set as a separate statement rather than prefixed on the command line:
+**On Windows / PowerShell** (VS Code's built-in terminal, for example), you have
+to set environment variables as their own line instead of putting them before
+the command:
 
 ```powershell
 bundle install
@@ -117,18 +187,25 @@ bundle exec rubocop
 bundle exec rake spec
 
 $env:HEADED = "1"
-bundle exec rspec spec/core          # watch it happen in a real Chrome window
+bundle exec rspec spec/core          # watch it happen in an actual Chrome window
 
 $env:TEST_ENV = "staging"
-bundle exec rspec                     # target a different environment
+bundle exec rspec                     # point it at a different environment
 ```
 
-`$env:HEADED` stays set for the rest of that terminal session — open a new
-terminal, or run `Remove-Item Env:HEADED`, to go back to headless.
+`$env:HEADED` stays set for the rest of that terminal session — open a fresh
+terminal, or run `Remove-Item Env:HEADED`, to go back to running headless.
 
-Reports land in `reports/` — logs, screenshots on failure, and a JUnit XML
-result file for CI integration.
+## Where to find the results
 
-## Tech stack
+Reports land in `reports/` — logs, screenshots of anything that failed, and a
+JUnit XML file for CI to pick up.
+
+## Links
+
+- Repo: [github.com/lola-olorode/saucedemo-ruby-automation](https://github.com/lola-olorode/saucedemo-ruby-automation)
+- Same framework, in Python: [`saucedemo-portfolio`](https://github.com/lola-olorode/saucedemo-portfolio)
+
+## Built with
 
 Ruby · Selenium WebDriver · RSpec · RuboCop · GitHub Actions
