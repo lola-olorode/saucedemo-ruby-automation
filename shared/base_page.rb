@@ -1,7 +1,6 @@
 require "selenium-webdriver"
 
 module Pages
-
   class BasePage
     DEFAULT_TIMEOUT = 10
 
@@ -12,7 +11,6 @@ module Pages
       @wait = Selenium::WebDriver::Wait.new(timeout: DEFAULT_TIMEOUT)
     end
 
-    
     def visit(url)
       driver.get(url)
       self
@@ -80,7 +78,6 @@ module Pages
 
     private
 
-    
     def click_registered?(el)
       driver.execute_script("return !!arguments[0].__wd_clicked;", el)
     rescue Selenium::WebDriver::Error::StaleElementReferenceError
