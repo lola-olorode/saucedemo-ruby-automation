@@ -1,8 +1,6 @@
 require_relative "../spec_helper"
 
-# Broader than the smoke sweep — exercises the purchase journey across
-# multiple fixture accounts, the kind of thing run before a release
-# rather than on every commit.
+
 RSpec.describe "Regression sweep", :regression do
   %w[standard performance_glitch].each do |user_key|
     it "completes a full purchase journey as '#{user_key}'" do

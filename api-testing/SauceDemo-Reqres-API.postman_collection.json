@@ -1,0 +1,279 @@
+{
+  "info": {
+    "_postman_id": "98dc19b6-1017-49c4-8b87-a17a62431307",
+    "name": "SauceDemo Ruby - Reqres API Regression",
+    "description": "Standalone Postman collection covering the same reqres.in API surface as api_tests/users_api_spec.rb (status codes, response schema, response time, auth header validation) — kept separate from the RSpec suite to demonstrate manual/exploratory API regression testing the way it's actually done with Postman, rather than duplicating the automated suite in another language. Import this collection plus the paired environment file, select the environment, then Run Collection (or Newman) to execute it end to end.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      { "key": "key", "value": "x-api-key", "type": "string" },
+      { "key": "value", "value": "{{api_key}}", "type": "string" },
+      { "key": "in", "value": "header", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Get single user returns expected shape",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has expected user fields\", function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.have.property(\"data\");",
+              "    const user = body.data;",
+              "    [\"id\", \"email\", \"first_name\", \"last_name\", \"avatar\"].forEach((field) => {",
+              "        pm.expect(user).to.have.property(field);",
+              "    });",
+              "    pm.expect(user.id).to.eql(2);",
+              "    pm.expect(user.email).to.include(\"@\");",
+              "});",
+              "",
+              "pm.test(\"Content-Type is application/json\", function () {",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "",
+              "pm.test(\"Response time is below 2000ms\", function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/users/2",
+          "host": ["{{base_url}}"],
+          "path": ["users", "2"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get user list is paginated",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response is paginated with expected fields\", function () {",
+              "    const body = pm.response.json();",
+              "    [\"page\", \"per_page\", \"total\", \"total_pages\", \"data\"].forEach((field) => {",
+              "        pm.expect(body).to.have.property(field);",
+              "    });",
+              "    pm.expect(body.page).to.eql(1);",
+              "    pm.expect(body.data.length).to.eql(body.per_page);",
+              "});",
+              "",
+              "pm.test(\"Response time is below 2000ms\", function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/users?page=1",
+          "host": ["{{base_url}}"],
+          "path": ["users"],
+          "query": [{ "key": "page", "value": "1" }]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get nonexistent user returns 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test(\"Response time is below 2000ms\", function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/users/999",
+          "host": ["{{base_url}}"],
+          "path": ["users", "999"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create user returns 201",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response echoes submitted fields and adds id/createdAt\", function () {",
+              "    const body = pm.response.json();",
+              "    const payload = JSON.parse(pm.request.body.raw);",
+              "    pm.expect(body.name).to.eql(payload.name);",
+              "    pm.expect(body.job).to.eql(payload.job);",
+              "    pm.expect(body).to.have.property(\"id\");",
+              "    pm.expect(body).to.have.property(\"createdAt\");",
+              "});",
+              "",
+              "pm.test(\"Content-Type is application/json\", function () {",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Funmilola Olorode\",\n  \"job\": \"QA Engineer\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/users",
+          "host": ["{{base_url}}"],
+          "path": ["users"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update user returns 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Job field is updated and updatedAt is present\", function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.job).to.eql(\"Senior QA Engineer\");",
+              "    pm.expect(body).to.have.property(\"updatedAt\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"job\": \"Senior QA Engineer\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/users/2",
+          "host": ["{{base_url}}"],
+          "path": ["users", "2"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete user returns 204",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 204\", function () {",
+              "    pm.response.to.have.status(204);",
+              "});",
+              "",
+              "pm.test(\"Response body is empty\", function () {",
+              "    pm.expect(pm.response.text()).to.eql(\"\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/users/2",
+          "host": ["{{base_url}}"],
+          "path": ["users", "2"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get single user succeeds without an API key",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Verified directly against the live API (curl, with no key / an empty",
+              "// key / a bogus key / a valid key) that reqres.in's free tier does not",
+              "// gate GET /users/:id on x-api-key -- every variant returns 200. This",
+              "// locks in that observed behavior so a future tightening shows up as a",
+              "// clear regression here, instead of an assertion that quietly stopped",
+              "// being true.",
+              "pm.test(\"Status code is 200 even with an empty API key\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response still returns the expected user\", function () {",
+              "    pm.expect(pm.response.json().data.id).to.eql(2);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [{ "key": "x-api-key", "value": "" }],
+        "url": {
+          "raw": "{{base_url}}/users/2",
+          "host": ["{{base_url}}"],
+          "path": ["users", "2"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

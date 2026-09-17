@@ -1,0 +1,50 @@
+00:08:20 | INFO  | Starting browser | env=prod
+00:08:22 | INFO  | STEP: Log in as fixture user 'standard'
+00:08:23 | INFO  | STEP: Add backpack to cart and navigate to cart page
+00:08:34 | INFO  | Quitting browser
+00:08:34 | INFO  | Starting browser | env=prod
+00:08:35 | INFO  | STEP: Log in as fixture user 'standard'
+00:08:36 | INFO  | STEP: Add backpack to cart and navigate to cart page
+00:08:36 | INFO  | STEP: Complete checkout from an already-populated cart
+00:08:37 | INFO  | Quitting browser
+00:08:37 | INFO  | Starting browser | env=prod
+00:08:38 | INFO  | STEP: Log in as fixture user 'standard'
+00:08:39 | INFO  | STEP: Add backpack to cart and navigate to cart page
+00:08:40 | INFO  | Quitting browser
+00:08:40 | INFO  | Starting browser | env=prod
+00:08:41 | INFO  | STEP: Log in as fixture user 'standard'
+00:08:42 | INFO  | Quitting browser
+00:08:42 | INFO  | Starting browser | env=prod
+00:08:43 | INFO  | STEP: Log in as fixture user 'standard'
+00:08:44 | INFO  | Quitting browser
+00:08:44 | INFO  | Starting browser | env=prod
+00:08:45 | INFO  | STEP: Log in as fixture user 'standard'
+00:08:46 | INFO  | Quitting browser
+00:08:46 | INFO  | Starting browser | env=prod
+00:08:48 | INFO  | STEP: Log in as fixture user 'standard'
+00:08:52 | INFO  | Quitting browser
+00:08:52 | INFO  | Starting browser | env=prod
+00:08:54 | INFO  | Quitting browser
+00:08:54 | INFO  | Starting browser | env=prod
+00:08:56 | INFO  | Quitting browser
+00:08:56 | INFO  | Starting browser | env=prod
+00:08:58 | INFO  | Quitting browser
+00:08:58 | INFO  | Starting browser | env=prod
+00:09:00 | INFO  | Quitting browser
+00:09:00 | INFO  | Starting browser | env=prod
+00:09:02 | INFO  | Quitting browser
+00:09:02 | INFO  | Starting browser | env=prod
+00:09:03 | INFO  | STEP: Log in as fixture user 'standard'
+00:09:04 | INFO  | STEP: Add backpack to cart and navigate to cart page
+00:09:04 | INFO  | STEP: Complete checkout from an already-populated cart
+00:09:05 | INFO  | Quitting browser
+00:09:05 | INFO  | Starting browser | env=prod
+00:09:06 | INFO  | STEP: Log in as fixture user 'performance_glitch'
+00:09:12 | INFO  | STEP: Add backpack to cart and navigate to cart page
+00:09:12 | INFO  | STEP: Complete checkout from an already-populated cart
+00:09:13 | INFO  | Quitting browser
+00:09:13 | INFO  | Starting browser | env=prod
+00:09:14 | INFO  | STEP: Log in as fixture user 'standard'
+00:09:15 | INFO  | STEP: Add backpack to cart and navigate to cart page
+00:09:16 | INFO  | STEP: Complete checkout from an already-populated cart
+00:09:17 | INFO  | Quitting browser

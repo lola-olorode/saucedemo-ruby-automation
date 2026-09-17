@@ -1,6 +1,6 @@
 require_relative "../shared/base_flow"
 require_relative "../pages/checkout_page"
-require_relative "../../dataloader/checkout_data_loader"
+require_relative "../dataloader/checkout_data_loader"
 
 module Flows
   class CheckoutFlow < Shared::BaseFlow

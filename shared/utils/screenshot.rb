@@ -1,9 +1,7 @@
 require "fileutils"
 
 module Support
-  # Captures a screenshot the moment a spec fails — wired into
-  # spec_helper.rb's `config.after(:each)` hook. Single most useful
-  # thing to have when triaging a red CI build.
+  # Captures a screenshot the moment a spec fails and saves it to reports/screenshots/
   module Screenshot
     DIR = "reports/screenshots".freeze
 

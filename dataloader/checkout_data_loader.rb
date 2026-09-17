@@ -1,7 +1,5 @@
 require "json"
 
-# Same pattern as UserLoader, kept separate because checkout data and
-# account data change independently in a real test suite.
 module Dataloader
   class CheckoutDataLoader
     FIXTURE_PATH = File.join(__dir__, "fixtures", "checkout_info.json")

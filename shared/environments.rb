@@ -1,10 +1,6 @@
 # Environment configuration layer.
 #
 # Lets the same suite target different environments without touching spec
-# code — set ENV["TEST_ENV"] and the base URL / timeout switch with it.
-# saucedemo.com only exposes one public target, so "staging" here points
-# at the same host — on a real project each key would point at a
-# genuinely different deployment.
 
 module Environments
   CONFIGS = {

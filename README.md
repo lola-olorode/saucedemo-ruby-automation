@@ -17,6 +17,8 @@ approach carries across stacks, not just this one.
   `standard_user` (works normally), `locked_out_user` (blocked at login), and
   `performance_glitch_user` (runs slow on purpose) — so the suite has real edge
   cases to test against, not just the happy path.
+- **The API:** [reqres.in](https://reqres.in/), a free public API made for testing
+  against, used by the `api_tests/` suite.
 - **Browser:** Chrome, and it runs headless (no visible window) by default — set
   `HEADED=1` if you want to actually watch it click through the site.
 - **Environment:** defaults to `prod` (the live public site); `TEST_ENV=staging`
@@ -27,31 +29,34 @@ approach carries across stacks, not just this one.
 
 ```
 saucedemo-ruby/
-├── lib/
-│   ├── components/           # UI pieces reused across pages (e.g. the burger menu)
-│   │   └── menu_component.rb
-│   ├── flows/                 # Chains page actions into a full journey (log in, buy something)
-│   │   ├── auth_flow.rb        # Login journeys
-│   │   ├── shopping_flow.rb    # Sort / add-to-cart journeys
-│   │   └── checkout_flow.rb    # Full checkout journey
-│   ├── pages/                 # One class per screen — the Page Object Model
-│   │   ├── login_page.rb
-│   │   ├── inventory_page.rb
-│   │   ├── cart_page.rb
-│   │   └── checkout_page.rb
-│   └── shared/
-│       ├── base_page.rb        # Wait/interaction helpers every page uses
-│       ├── base_flow.rb        # Shared step-logging every flow uses
-│       ├── environments.rb     # dev/staging/prod-style environment switching
-│       └── utils/
-│           ├── logger.rb        # Logs each run to file and console
-│           └── screenshot.rb    # Grabs a screenshot the moment a spec fails
+├── components/               # UI pieces reused across pages (e.g. the burger menu)
+│   └── menu_component.rb
+├── flows/                     # Chains page actions into a full journey (log in, buy something)
+│   ├── auth_flow.rb            # Login journeys
+│   ├── shopping_flow.rb        # Sort / add-to-cart journeys
+│   └── checkout_flow.rb        # Full checkout journey
+├── pages/                     # One class per screen — the Page Object Model
+│   ├── login_page.rb
+│   ├── inventory_page.rb
+│   ├── cart_page.rb
+│   └── checkout_page.rb
+├── shared/
+│   ├── base_page.rb              # Wait/interaction helpers every page uses
+│   ├── base_flow.rb              # Shared step-logging every flow uses
+│   ├── environments.rb           # dev/staging/prod-style environment switching
+│   └── utils/
+│       ├── logger.rb              # Logs each run to file and console
+│       └── screenshot.rb          # Grabs a screenshot the moment a spec fails
 ├── dataloader/                # Test data lives in JSON, not hardcoded in specs
 │   ├── fixtures/
 │   │   ├── users.json
 │   │   └── checkout_info.json
 │   ├── user_loader.rb
 │   └── checkout_data_loader.rb
+├── api_tests/                 # API tests, separate from the browser specs
+│   ├── api_client.rb
+│   └── users_api_spec.rb
+├── api-testing/                # A standalone Postman collection (see its own README)
 ├── spec/
 │   ├── spec_helper.rb           # Driver lifecycle, logged-in helper, failure hook
 │   ├── core/                     # One file per feature/screen
@@ -93,6 +98,11 @@ Inside `spec/`:
   - **unit** tests the framework's own logic, like environment selection and
     fixture loading, with no browser involved at all — `spec_helper.rb` only
     spins up Chrome for specs under `core/` and `sweeps/`, so unit specs stay fast.
+
+There are also two ways of testing the API:
+  `api_tests/` is automated and runs in CI on every push, while
+  `api-testing/` is a Postman collection for the kind of manual, exploratory API checking that actually happens day to day on a real team.
+  See [`api-testing/README.md`](./api-testing/README.md) for that one.
 
 Everything runs through **GitHub Actions**: it lints the code first (RuboCop),
 and only runs the full suite if that passes.
@@ -140,6 +150,16 @@ that same full journey, but across both `standard_user` and
 every commit — it's about testing the same journey across different accounts,
 not new edge cases.
 
+### API tests — [`api_tests/users_api_spec.rb`](./api_tests/users_api_spec.rb)
+
+These hit [reqres.in](https://reqres.in/) directly, no browser involved: fetching
+a single user and checking its shape (status code, fields, headers, response
+time), fetching a paginated list, a 404 for a user that doesn't exist, creating,
+updating, and deleting a user, and one check that confirms `GET` requests work
+fine with no API key at all. That last one is there on purpose — I checked it
+directly against the live API first, so if reqres.in ever tightens that up, this
+spec will catch it as a clear failure instead of just quietly becoming wrong.
+
 ### Testing the framework itself — [`spec/unit/`](./spec/unit)
 
 **`environments_spec.rb`** checks environment selection: it defaults to `prod`
@@ -152,6 +172,13 @@ failing silently.
 
 Neither of these opens a browser — that's the point of keeping them separate
 from `core/` and `sweeps/`.
+
+### The manual side
+
+Not everything belongs in an automated spec. A manual regression suite and a
+requirement-traceability matrix (which requirement maps to which test, automated
+or not) live in [`REGRESSION_SUITE.md`](./REGRESSION_SUITE.md), so the gaps in
+automated coverage are visible instead of hidden.
 
 ## A couple of things worth knowing
 
@@ -172,6 +199,7 @@ bundle install
 bundle exec rubocop                  # lint
 bundle exec rake spec              # full suite — headless by default, no browser window appears
 bundle exec rake unit                # framework-logic specs only, no browser
+bundle exec rake api                 # just the API suite, no browser
 bundle exec rspec spec/sweeps        # full-journey sweeps only
 HEADED=1 bundle exec rspec spec/core  # watch it happen in an actual Chrome window
 TEST_ENV=staging bundle exec rspec     # point it at a different environment
@@ -204,8 +232,9 @@ JUnit XML file for CI to pick up.
 ## Links
 
 - Repo: [github.com/lola-olorode/saucedemo-ruby-automation](https://github.com/lola-olorode/saucedemo-ruby-automation)
+- CI runs: [Actions tab](https://github.com/lola-olorode/saucedemo-ruby-automation/actions)
 - Same framework, in Python: [`saucedemo-portfolio`](https://github.com/lola-olorode/saucedemo-portfolio)
 
 ## Built with
 
-Ruby · Selenium WebDriver · RSpec · RuboCop · GitHub Actions
+Ruby · Selenium WebDriver · RSpec · HTTParty · RuboCop · Postman/Newman · GitHub Actions

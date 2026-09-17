@@ -1,13 +1,13 @@
 require "selenium-webdriver"
-require_relative "../lib/pages/login_page"
-require_relative "../lib/pages/inventory_page"
-require_relative "../lib/pages/cart_page"
-require_relative "../lib/pages/checkout_page"
-require_relative "../lib/shared/utils/logger"
-require_relative "../lib/shared/utils/screenshot"
-require_relative "../lib/flows/auth_flow"
-require_relative "../lib/flows/shopping_flow"
-require_relative "../lib/flows/checkout_flow"
+require_relative "../pages/login_page"
+require_relative "../pages/inventory_page"
+require_relative "../pages/cart_page"
+require_relative "../pages/checkout_page"
+require_relative "../shared/utils/logger"
+require_relative "../shared/utils/screenshot"
+require_relative "../flows/auth_flow"
+require_relative "../flows/shopping_flow"
+require_relative "../flows/checkout_flow"
 require_relative "../dataloader/user_loader"
 require_relative "../dataloader/checkout_data_loader"
 
@@ -22,9 +22,7 @@ RSpec.configure do |config|
 
   logger = Support::TestLogger.instance
 
-  # spec/core and spec/sweeps drive a real browser; spec/unit exercises
-  # framework logic (environments, dataloaders) in isolation and has no
-  # business paying for a Chrome launch on every example.
+
   config.define_derived_metadata(file_path: %r{/spec/(core|sweeps)/}) do |metadata|
     metadata[:type] = :feature
   end
@@ -49,10 +47,6 @@ RSpec.configure do |config|
     @driver&.quit
   end
 
-  # Helper available in every spec: returns a driver already logged in
-  # as the standard fixture user, landed on the inventory page — via
-  # AuthFlow, so the login journey lives in one place instead of being
-  # repeated across specs.
   config.include(Module.new do
     def logged_in_driver
       Flows::AuthFlow.new(@driver).login_and_reach_inventory("standard")

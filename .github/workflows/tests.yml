@@ -27,6 +27,10 @@ jobs:
   test:
     needs: lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
@@ -43,6 +47,12 @@ jobs:
 
       - name: Run test suite
         run: bundle exec rake spec
+
+      - name: Publish test report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: reports/rspec_results.xml
 
       - name: Upload test report
         if: always()

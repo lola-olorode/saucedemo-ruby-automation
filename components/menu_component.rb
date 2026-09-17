@@ -1,9 +1,5 @@
 require_relative "../shared/base_page"
 
-# The burger-menu (logout, reset app state) appears identically on every
-# logged-in screen. Modeling it as a component rather than duplicating
-# its locators in every page object means one update here fixes it
-# everywhere it's used.
 module Components
   class MenuComponent < Pages::BasePage
     MENU_BUTTON = [:id, "react-burger-menu-btn"].freeze

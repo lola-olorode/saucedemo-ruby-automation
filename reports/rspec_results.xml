@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="rspec" tests="27" skipped="0" failures="0" errors="0" time="55.451122" timestamp="2026-09-18T00:10:02+01:00" hostname="TTUMMEE">
+<properties>
+<property name="seed" value="35386"/>
+</properties>
+<testcase classname="spec.sweeps.smoke_sweep_spec" name="Smoke sweep completes a full purchase journey" file="./spec/sweeps/smoke_sweep_spec.rb" time="3.167199"></testcase>
+<testcase classname="api_tests.users_api_spec" name="Users API returns the expected shape for a single user" file="./api_tests/users_api_spec.rb" time="0.094016"></testcase>
+<testcase classname="api_tests.users_api_spec" name="Users API paginates the user list" file="./api_tests/users_api_spec.rb" time="0.103803"></testcase>
+<testcase classname="api_tests.users_api_spec" name="Users API returns 404 for a nonexistent user" file="./api_tests/users_api_spec.rb" time="0.108474"></testcase>
+<testcase classname="api_tests.users_api_spec" name="Users API returns 201 when creating a user" file="./api_tests/users_api_spec.rb" time="0.092506"></testcase>
+<testcase classname="api_tests.users_api_spec" name="Users API returns 200 when updating a user" file="./api_tests/users_api_spec.rb" time="0.093726"></testcase>
+<testcase classname="api_tests.users_api_spec" name="Users API returns 204 with an empty body when deleting a user" file="./api_tests/users_api_spec.rb" time="0.096888"></testcase>
+<testcase classname="api_tests.users_api_spec" name="Users API succeeds on a single-user lookup with no API key" file="./api_tests/users_api_spec.rb" time="0.057708"></testcase>
+<testcase classname="spec.core.cart_checkout_spec" name="Cart and Checkout removes an item from the cart" file="./spec/core/cart_checkout_spec.rb" time="12.372586"></testcase>
+<testcase classname="spec.core.cart_checkout_spec" name="Cart and Checkout completes the full checkout happy path" file="./spec/core/cart_checkout_spec.rb" time="3.017593"></testcase>
+<testcase classname="spec.core.cart_checkout_spec" name="Cart and Checkout requires a first name to proceed through checkout" file="./spec/core/cart_checkout_spec.rb" time="2.858247"></testcase>
+<testcase classname="spec.core.inventory_spec" name="Inventory sorts by price low to high" file="./spec/core/inventory_spec.rb" time="2.173576"></testcase>
+<testcase classname="spec.core.inventory_spec" name="Inventory sorts by price high to low" file="./spec/core/inventory_spec.rb" time="2.195479"></testcase>
+<testcase classname="spec.core.inventory_spec" name="Inventory sorts by name A to Z" file="./spec/core/inventory_spec.rb" time="2.180950"></testcase>
+<testcase classname="spec.core.inventory_spec" name="Inventory updates the cart badge when an item is added" file="./spec/core/inventory_spec.rb" time="5.326944"></testcase>
+<testcase classname="spec.core.login_spec" name="Login lands on the inventory page with valid credentials" file="./spec/core/login_spec.rb" time="1.913022"></testcase>
+<testcase classname="spec.core.login_spec" name="Login blocks a locked-out user" file="./spec/core/login_spec.rb" time="2.050451"></testcase>
+<testcase classname="spec.core.login_spec" name="Login shows an error for invalid credentials: username is required" file="./spec/core/login_spec.rb" time="1.939827"></testcase>
+<testcase classname="spec.core.login_spec" name="Login shows an error for invalid credentials: password is required" file="./spec/core/login_spec.rb" time="2.020914"></testcase>
+<testcase classname="spec.core.login_spec" name="Login shows an error for invalid credentials: do not match" file="./spec/core/login_spec.rb" time="2.351375"></testcase>
+<testcase classname="spec.sweeps.regression_sweep_spec" name="Regression sweep completes a full purchase journey as &apos;standard&apos;" file="./spec/sweeps/regression_sweep_spec.rb" time="3.016934"></testcase>
+<testcase classname="spec.sweeps.regression_sweep_spec" name="Regression sweep completes a full purchase journey as &apos;performance_glitch&apos;" file="./spec/sweeps/regression_sweep_spec.rb" time="8.188826"></testcase>
+<testcase classname="spec.unit.environments_spec" name="Environments defaults to prod when TEST_ENV is unset" file="./spec/unit/environments_spec.rb" time="0.000728"></testcase>
+<testcase classname="spec.unit.environments_spec" name="Environments returns the staging config when TEST_ENV=staging" file="./spec/unit/environments_spec.rb" time="0.000674"></testcase>
+<testcase classname="spec.unit.environments_spec" name="Environments raises a clear error for an unknown environment" file="./spec/unit/environments_spec.rb" time="0.005977"></testcase>
+<testcase classname="spec.unit.user_loader_spec" name="Dataloader::UserLoader loads a known fixture user by key" file="./spec/unit/user_loader_spec.rb" time="0.000722"></testcase>
+<testcase classname="spec.unit.user_loader_spec" name="Dataloader::UserLoader raises a clear error for an unknown fixture key" file="./spec/unit/user_loader_spec.rb" time="0.001187"></testcase>
+</testsuite>

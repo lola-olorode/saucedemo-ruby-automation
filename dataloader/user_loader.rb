@@ -1,8 +1,6 @@
 require "json"
 
-# User dataloader. Loads account fixtures from dataloader/fixtures/users.json
-# rather than hardcoding credentials in spec files — new accounts or
-# environments can be added by editing a fixture, not code.
+
 module Dataloader
   class UserLoader
     FIXTURE_PATH = File.join(__dir__, "fixtures", "users.json")

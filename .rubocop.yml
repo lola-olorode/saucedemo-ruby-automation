@@ -43,7 +43,7 @@ RSpec/InstanceVariable:
   Enabled: false
 
 # spec/ is organized by test type (core/sweeps/unit), per the README —
-# not mirrored 1:1 to lib/'s structure.
+# not mirrored 1:1 to pages/flows/shared's structure.
 RSpec/SpecFilePathFormat:
   Enabled: false
 

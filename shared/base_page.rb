@@ -1,9 +1,7 @@
 require "selenium-webdriver"
 
 module Pages
-  # All page objects inherit from this. Centralizes the Selenium
-  # wait/interaction logic so individual page classes stay declarative
-  # (locators + actions) instead of repeating boilerplate wait code.
+
   class BasePage
     DEFAULT_TIMEOUT = 10
 
@@ -14,8 +12,7 @@ module Pages
       @wait = Selenium::WebDriver::Wait.new(timeout: DEFAULT_TIMEOUT)
     end
 
-    # Named `visit`, not `open`, so a bare call inside a page object can't
-    # be misread as (or accidentally shadow) Kernel#open.
+    
     def visit(url)
       driver.get(url)
       self
@@ -31,15 +28,6 @@ module Pages
       driver.find_elements(*locator)
     end
 
-    # A plain WebDriver click occasionally lands on the element (confirmed
-    # by coordinates and `elementFromPoint`) but never actually fires the
-    # page's click handler — observed against saucedemo.com's "Add to
-    # cart" buttons on current Chrome/W3C Actions. Rather than switch
-    # every click to a JS-dispatched one (which can "click" things a real
-    # user couldn't, e.g. a covered or disabled element), this instruments
-    # the element with a one-shot listener, does the normal native click,
-    # and only falls back to a JS click if the native one demonstrably
-    # never reached the element.
     def click(locator)
       @wait.until { driver.find_element(*locator).enabled? }
       el = driver.find_element(*locator)
@@ -57,14 +45,6 @@ module Pages
       self
     end
 
-    # Same class of problem as #click, on the input side: native send_keys
-    # occasionally leaves a React-controlled field's DOM value unchanged
-    # (observed on the checkout form) even though no error is raised. This
-    # verifies the value actually landed and, if not, sets it through
-    # React's own native input setter plus a real "input"/"change" event —
-    # the standard way to update a React-controlled field from outside
-    # React — so the app's own state updates exactly as it would for a
-    # user typing.
     def type_text(locator, text)
       el = find(locator)
       el.clear
@@ -100,10 +80,7 @@ module Pages
 
     private
 
-    # If the click legitimately navigated or re-rendered the page, `el`
-    # may already be detached by the time we check it — that's evidence
-    # the click worked, not that it failed, so treat it as a success
-    # rather than firing a redundant (possibly double-submitting) JS click.
+    
     def click_registered?(el)
       driver.execute_script("return !!arguments[0].__wd_clicked;", el)
     rescue Selenium::WebDriver::Error::StaleElementReferenceError

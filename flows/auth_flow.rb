@@ -1,7 +1,7 @@
 require_relative "../shared/base_flow"
 require_relative "../pages/login_page"
 require_relative "../pages/inventory_page"
-require_relative "../../dataloader/user_loader"
+require_relative "../dataloader/user_loader"
 
 module Flows
   class AuthFlow < Shared::BaseFlow
